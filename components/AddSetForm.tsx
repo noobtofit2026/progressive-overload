@@ -4,6 +4,14 @@ import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { WorkoutSet } from "@/lib/types";
 
+const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] as const;
+
+function todayShortDay() {
+  const idx = new Date().getDay(); // 0 = Sun
+  const map = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  return map[idx] as (typeof DAYS)[number];
+}
+
 export default function AddSetForm({
   onAdded,
   knownExercises,
@@ -16,6 +24,7 @@ export default function AddSetForm({
   const [unit, setUnit] = useState<"kg" | "lb">("kg");
   const [reps, setReps] = useState("");
   const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10));
+  const [day, setDay] = useState<(typeof DAYS)[number]>(todayShortDay());
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
@@ -40,6 +49,25 @@ export default function AddSetForm({
       return;
     }
 
+    // Max 10 rows per day for this user
+    const { count, error: countError } = await supabase
+      .from("sets")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", user.id)
+      .eq("day_of_week", day);
+
+    if (countError) {
+      setError(countError.message);
+      setSaving(false);
+      return;
+    }
+
+    if ((count ?? 0) >= 10) {
+      setError(`${day} already has 10 entries — remove one first.`);
+      setSaving(false);
+      return;
+    }
+
     const { data, error: insertError } = await supabase
       .from("sets")
       .insert({
@@ -49,6 +77,7 @@ export default function AddSetForm({
         unit,
         reps: Number(reps),
         performed_at: date,
+        day_of_week: day,
       })
       .select()
       .single();
@@ -87,6 +116,21 @@ export default function AddSetForm({
               <option key={ex} value={ex} />
             ))}
           </datalist>
+        </div>
+
+        <div>
+          <label className="text-xs text-mute uppercase tracking-wide">Day</label>
+          <select
+            value={day}
+            onChange={(e) => setDay(e.target.value as (typeof DAYS)[number])}
+            className="mt-1 w-full bg-surface2 border border-white/10 rounded-card px-3 py-2.5 text-sm text-chalk outline-none focus:border-brass/60"
+          >
+            {DAYS.map((d) => (
+              <option key={d} value={d}>
+                {d}
+              </option>
+            ))}
+          </select>
         </div>
 
         <div className="grid grid-cols-2 gap-3">

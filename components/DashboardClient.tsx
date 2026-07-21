@@ -3,17 +3,20 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { WorkoutSet } from "@/lib/types";
+import { WorkoutSet, BodyWeightEntry } from "@/lib/types";
 import AddSetForm from "@/components/AddSetForm";
 import WorkoutTable from "@/components/WorkoutTable";
 import ProgressChart from "@/components/ProgressChart";
 import PRBadges from "@/components/PRBadges";
+import BodyWeightTracker from "@/components/BodyWeightTracker";
 
 export default function DashboardClient({
   initialSets,
+  initialBodyWeight,
   userEmail,
 }: {
   initialSets: WorkoutSet[];
+  initialBodyWeight: BodyWeightEntry[];
   userEmail: string;
 }) {
   const [sets, setSets] = useState<WorkoutSet[]>(initialSets);
@@ -90,6 +93,8 @@ export default function DashboardClient({
             )}
 
             <WorkoutTable sets={sets} onDeleted={handleDeleted} />
+
+            <BodyWeightTracker initialEntries={initialBodyWeight} />
           </div>
         </div>
       </div>

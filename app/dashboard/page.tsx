@@ -19,5 +19,16 @@ export default async function DashboardPage() {
     .order("performed_at", { ascending: false })
     .order("created_at", { ascending: false });
 
-  return <DashboardClient initialSets={sets ?? []} userEmail={user.email ?? ""} />;
+  const { data: bodyWeight } = await supabase
+    .from("body_weight")
+    .select("*")
+    .order("logged_at", { ascending: false });
+
+  return (
+    <DashboardClient
+      initialSets={sets ?? []}
+      initialBodyWeight={bodyWeight ?? []}
+      userEmail={user.email ?? ""}
+    />
+  );
 }

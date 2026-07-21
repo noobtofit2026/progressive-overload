@@ -52,6 +52,7 @@ export default function WorkoutTable({
         <table className="w-full text-sm">
           <thead>
             <tr className="text-left text-xs text-mute uppercase tracking-wide border-b border-white/5">
+              <th className="px-5 py-3 font-medium">Day</th>
               <th className="px-5 py-3 font-medium">Date</th>
               <th className="px-5 py-3 font-medium">Exercise</th>
               <th className="px-5 py-3 font-medium tabular">Weight</th>
@@ -62,6 +63,9 @@ export default function WorkoutTable({
           <tbody>
             {sets.map((s) => (
               <tr key={s.id} className="border-b border-white/5 last:border-0 hover:bg-white/[0.02]">
+                <td className="px-5 py-3 text-brass font-medium whitespace-nowrap">
+                  {s.day_of_week ?? "—"}
+                </td>
                 <td className="px-5 py-3 text-mute tabular whitespace-nowrap">
                   {formatDate(s.performed_at)}
                 </td>
